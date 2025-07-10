@@ -13,21 +13,18 @@ A custom Frappe application that provides JWT authentication with RS256 encrypti
 - **JWKS Support** - Industry standard key distribution
 - **Production Ready** - Deployed and tested on Frappe Cloud
 
-## 🚀 Production Deployment
+## 🌐 Production Deployment
 
-### **Live Production Environment**
-- **Production URL**: `https://sppmaster.frappe.cloud`
-- **Status**: ✅ DEPLOYED AND OPERATIONAL
-- **Testing**: ✅ All endpoints verified and working
+**Live Production Environment:** `https://sppmaster.frappe.cloud`
 
-### **Production Test Results**
+### ✅ Production Test Results
 
-| **Test** | **Endpoint** | **Status** | **Result** |
-|----------|-------------|------------|------------|
-| Health Check | `/api/method/jwt_auth.api.auth.health` | ✅ PASS | Service running |
-| User Login | `/api/method/jwt_auth.api.auth.login` | ✅ PASS | JWT generated |
-| Public Key | `/api/method/jwt_auth.api.auth.public_key` | ✅ PASS | Key retrieved |
-| JWKS | `/api/method/jwt_auth.api.auth.jwks` | ✅ PASS | JWKS format |
+| **Endpoint** | **Status** | **Description** |
+|-------------|------------|-----------------|
+| `/api/method/jwt_auth.api.auth.health` | ✅ LIVE | Service health check |
+| `/api/method/jwt_auth.api.auth.login` | ✅ LIVE | User authentication & JWT generation |
+| `/api/method/jwt_auth.api.auth.public_key` | ✅ LIVE | Public key for JWT verification |
+| `/api/method/jwt_auth.api.auth.jwks` | ✅ LIVE | JSON Web Key Set (JWKS) endpoint |
 
 ## 🔧 Installation
 
@@ -35,7 +32,6 @@ A custom Frappe application that provides JWT authentication with RS256 encrypti
 - Frappe/ERPNext instance
 - Python 3.10+
 - PyJWT library with crypto support
-- cryptography library
 
 ### Install the App
 
@@ -59,15 +55,14 @@ A custom Frappe application that provides JWT authentication with RS256 encrypti
 
 ## 🚀 Usage
 
-### Production Endpoints
+### Production Authentication Endpoint
 
-#### **Authentication Endpoint**
 **POST** `https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.login`
 
 **Request:**
 ```json
 {
-  "username": "user@domain.com",
+  "username": "your-username",
   "password": "your-password"
 }
 ```
@@ -81,123 +76,62 @@ A custom Frappe application that provides JWT authentication with RS256 encrypti
   "expires_at": "2025-07-11T10:52:08.750530",
   "user": {
     "userId": "username",
-    "email": "user@domain.com",
-    "name": "User Full Name",
-    "roles": ["System Manager", "Line Inspector", "Packer", ...]
+    "email": "user@example.com",
+    "name": "User Name",
+    "roles": ["Manufacturing Role 1", "Manufacturing Role 2"]
   }
-}
-```
-
-#### **JWKS Endpoint (Recommended for Clients)**
-**GET** `https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.jwks`
-
-**Response:**
-```json
-{
-  "keys": [{
-    "kty": "RSA",
-    "use": "sig",
-    "alg": "RS256", 
-    "kid": "jwt-auth-key-1",
-    "n": "base64url-encoded-modulus",
-    "e": "AQAB"
-  }]
-}
-```
-
-#### **Public Key Endpoint**
-**GET** `https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.public_key`
-
-**Response:**
-```json
-{
-  "public_key": "-----BEGIN PUBLIC KEY-----\n...",
-  "algorithm": "RS256",
-  "use": "sig",
-  "key_type": "RSA"
-}
-```
-
-#### **Health Check**
-**GET** `https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.health`
-
-**Response:**
-```json
-{
-  "status": "healthy",
-  "message": "JWT Authentication service is running",
-  "timestamp": "2025-07-10T10:15:00Z"
 }
 ```
 
 ### Production JWT Payload Structure
 
-The production JWT token contains the following claims as per client specifications:
+The production JWT token contains the following verified structure:
 
 ```json
 {
-  "iss": "https://sppmaster.frappe.cloud",        // Production issuer
-  "sub": "user@domain.com",                       // Subject (user email)
-  "aud": "https://alphaworkz.api.com",           // Audience (client API)
-  "exp": 1752231128,                             // Expiration timestamp
-  "nbf": 1752144728,                             // Not Before timestamp
-  "iat": 1752144728,                             // Issued At timestamp
-  "jti": "b17019be-9a76-4651-a1cc-5dfb99375d96", // JWT ID (UUID)
-  "userId": "username",                          // Custom: User ID
-  "roles": [                                     // Custom: Manufacturing roles
-    "System Manager",
-    "Line Inspector", 
-    "Packer",
-    "Batch Operator",
-    "Compound Inspector",
-    "Quality Executive",
-    "Production Executive",
-    "Despatcher",
-    "Incoming Inspector",
-    "Mill Operator",
-    "Blanker",
-    "Lot Inspector",
-    "U2 Supervisor",
-    "U1 Supervisor", 
-    "U3 Supervisor"
-  ],
-  "email": "user@domain.com",                    // Custom: User email
-  "name": "User Full Name"                       // Custom: User name
+  "iss": "https://sppmaster.frappe.cloud",     // Production issuer
+  "sub": "user@example.com",                   // Subject (user email)
+  "aud": "https://alphaworkz.api.com",        // Audience (client API)
+  "exp": 1752231128,                          // Expiration timestamp
+  "nbf": 1752144728,                          // Not Before timestamp
+  "iat": 1752144728,                          // Issued At timestamp
+  "jti": "b17019be-9a76-4651-a1cc-5dfb99375d96", // Unique JWT ID
+  "userId": "username",                        // Custom: User ID
+  "roles": ["role1", "role2"],                // Custom: User roles
+  "email": "user@example.com",                // Custom: User email
+  "name": "User Name"                         // Custom: User name
 }
 ```
 
 ## 🔐 Security & Key Management
 
-### **Production Key Distribution**
+### Production Key Endpoints
 
-**For Client Integration - Use These Endpoints:**
+**JWKS Endpoint (Recommended for Automated Key Discovery):**
+```bash
+GET https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.jwks
+```
 
-1. **JWKS (Automated Key Discovery) - Recommended:**
-   ```
-   https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.jwks
-   ```
-
-2. **Direct Public Key:**
-   ```
-   https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.public_key
-   ```
-
-### **Security Features**
-- ✅ **RS256 Algorithm** - RSA with SHA-256 signing
-- ✅ **Public Key Distribution** - Safe to share publicly
-- ✅ **Private Key Security** - Kept secure on server only
-- ✅ **HTTPS Endpoints** - All communication encrypted
-- ✅ **Token Expiry** - 24-hour automatic expiration
-- ✅ **Unique JWT IDs** - Prevents replay attacks
+**Direct Public Key Endpoint:**
+```bash
+GET https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.public_key
+```
 
 ### Manufacturing Roles Supported
 
 The JWT includes all manufacturing roles from ERPNext:
-- **System Management**: System Manager
 - **Supervisory Roles**: U1 Supervisor, U2 Supervisor, U3 Supervisor
-- **Quality Control**: Quality Executive, Line Inspector, Lot Inspector, Incoming Inspector, Compound Inspector
-- **Production**: Production Executive, Mill Operator, Batch Operator, Blanker
-- **Logistics**: Packer, Despatcher
+- **Quality Roles**: Quality Executive, Line Inspector, Lot Inspector, Incoming Inspector, Compound Inspector
+- **Production Roles**: Production Executive, Mill Operator, Batch Operator, Blanker, Packer
+- **Operations**: Despatcher
+- **Administrative**: System Manager
+
+### Key Distribution Best Practices
+
+✅ **Public keys are safe to share** - designed for verification  
+✅ **JWKS endpoints follow industry standards** (Google, Microsoft, Auth0)  
+✅ **Keys served over HTTPS** - prevents tampering  
+✅ **Key versioning supported** - enables smooth key rotation  
 
 ## 🧪 Testing
 
@@ -210,7 +144,7 @@ curl -X GET "https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.health"
 # Login test
 curl -X POST "https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.login" \
   -H "Content-Type: application/json" \
-  -d '{"username": "your-email@domain.com", "password": "your-password"}'
+  -d '{"username": "your-username", "password": "your-password"}'
 
 # Get public key
 curl -X GET "https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.public_key"
@@ -225,18 +159,54 @@ curl -X GET "https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.jwks"
 # Health check
 curl -X GET "http://localhost:8000/api/method/jwt_auth.api.auth.health"
 
-# Login test  
+# Login test
 curl -X POST "http://localhost:8000/api/method/jwt_auth.api.auth.login" \
   -H "Content-Type: application/json" \
   -d '{"username": "Administrator", "password": "admin"}'
 ```
 
+### JWT Verification (Client Side)
+
+```python
+import jwt
+
+# Using production public key endpoint
+import requests
+
+# Get public key
+response = requests.get('https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.public_key')
+public_key = response.json()['message']['public_key']
+
+# Verify JWT
+payload = jwt.decode(token, public_key, algorithms=["RS256"])
+print(payload)
+```
+
+## 📁 Project Structure
+
+```
+jwt_auth/
+├── jwt_auth/
+│   ├── api/
+│   │   ├── __init__.py
+│   │   └── auth.py              # Authentication endpoints
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── jwt_utils.py         # JWT utility functions
+│   ├── config/
+│   │   ├── jwt_private_key.pem  # RSA private key
+│   │   └── jwt_public_key.pem   # RSA public key
+│   └── hooks.py                 # Frappe hooks
+├── pyproject.toml               # Dependencies
+└── README.md                    # This file
+```
+
 ## 🔄 Client Integration
 
-### **Automated Key Discovery (Recommended)**
+### Automated Key Discovery (Recommended)
 
 ```javascript
-// Node.js example with automatic JWKS key discovery
+// Node.js example with JWKS
 const jwksClient = require('jwks-rsa');
 const jwt = require('jsonwebtoken');
 
@@ -260,156 +230,131 @@ jwt.verify(token, getKey, {
   if (err) {
     console.error('Invalid token:', err);
   } else {
-    console.log('Valid token:', decoded);
-    console.log('User roles:', decoded.roles);
-    console.log('User ID:', decoded.userId);
+    console.log('User:', decoded.userId);
+    console.log('Roles:', decoded.roles);
   }
 });
 ```
 
-### **Manual Public Key Verification**
+### Direct Public Key Method
 
 ```javascript
-// Manual verification with public key
-const jwt = require('jsonwebtoken');
+// Using direct public key endpoint
+const axios = require('axios');
 
-const publicKey = `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2UrAN+/9AojOO1+/jK3s
-wJAsFnkM52ukfWARp9TJJostomLo3qiokXgr4NuB89E5FuecVd1YaP2ni1MsX5ao
-q8ZPsHjkzS8xntUhSpvt22E8abn8LTBHXuHh2Y79Uz+1hI2g7rWE2C1vj0BOWcw8
-jE6lSl/Btp4y8+eZGpyYuwRgz9DFBYqxcM+7y9CBZrknQ/SQzb845niARm18FUSp
-GhmuN3GOQ7Pcj7WOYaXt6m5AVu3XUzAY/xnnBr/aLr/JulQ5bohE3LIHmbvPlxNP
-H2k8faYjB8E7XWHsRXihncHlXBXxCqwUa34eoElYhnNt8pKVOJLujWHJBu5BTH95
-BwIDAQAB
------END PUBLIC KEY-----`;
-
-try {
-  const payload = jwt.verify(token, publicKey, {
-    algorithms: ['RS256'],
-    audience: 'https://alphaworkz.api.com',
-    issuer: 'https://sppmaster.frappe.cloud'
-  });
+async function verifyToken(token) {
+  // Get public key
+  const keyResponse = await axios.get(
+    'https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.public_key'
+  );
   
-  console.log('User:', payload.userId);
-  console.log('Roles:', payload.roles);
-  console.log('Email:', payload.email);
-} catch (error) {
-  console.error('Invalid token:', error.message);
+  const publicKey = keyResponse.data.message.public_key;
+  
+  // Verify JWT
+  try {
+    const payload = jwt.verify(token, publicKey, {
+      algorithms: ['RS256'],
+      audience: 'https://alphaworkz.api.com',
+      issuer: 'https://sppmaster.frappe.cloud'
+    });
+    
+    return { valid: true, payload };
+  } catch (error) {
+    return { valid: false, error: error.message };
+  }
 }
 ```
 
-### **API Requests with JWT**
+### API Request with JWT
 
 ```javascript
-// Using JWT for subsequent API requests
+// Using the JWT token for API requests
 const headers = {
   'Authorization': `Bearer ${jwt_token}`,
   'Content-Type': 'application/json'
 };
 
-// Example API call
-fetch('https://your-client-api.com/manufacturing/data', { 
-  headers,
-  method: 'GET'
-})
-.then(response => response.json())
-.then(data => {
-  console.log('Manufacturing data:', data);
-});
-
-// Example with role-based access
-fetch('https://your-client-api.com/quality/inspection', {
-  headers,
-  method: 'POST',
-  body: JSON.stringify({
-    inspector_role: 'Quality Executive',
-    batch_id: 'BATCH001'
-  })
-})
-.then(response => response.json())
-.then(result => {
-  console.log('Inspection result:', result);
-});
+fetch('https://your-api-endpoint.com/data', { headers })
+  .then(response => response.json())
+  .then(data => console.log(data));
 ```
 
-## 🛠️ Configuration
+## 🌟 Production Features
 
-### JWT Settings
+### ✅ Verified Production Capabilities
 
-Configure JWT behavior in `site_config.json`:
+- **RS256 Encryption**: Industry-standard asymmetric signing
+- **24-Hour Token Validity**: Configurable expiry times
+- **Role-Based Access**: Complete ERPNext manufacturing roles
+- **JWKS Compliance**: Standard key distribution format
+- **Health Monitoring**: Service health check endpoint
+- **Secure Key Management**: Public key distribution over HTTPS
 
-```json
-{
-  "jwt_expiry_hours": 24,
-  "jwt_issuer": "https://sppmaster.frappe.cloud",
-  "jwt_audience": "https://alphaworkz.api.com"
-}
-```
+### 🏭 Manufacturing Integration
 
-## 📁 Project Structure
-
-```
-jwt_auth/
-├── jwt_auth/
-│   ├── api/
-│   │   ├── __init__.py
-│   │   └── auth.py              # Authentication endpoints
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   └── jwt_utils.py         # JWT utility functions
-│   ├── config/
-│   │   ├── jwt_private_key.pem  # RSA private key (server only)
-│   │   └── jwt_public_key.pem   # RSA public key (shareable)
-│   └── hooks.py                 # Frappe hooks
-├── pyproject.toml               # Dependencies (PyJWT, cryptography)
-├── .gitignore                   # Git ignore patterns
-└── README.md                    # This documentation
-```
+Perfect integration with ERPNext manufacturing workflows:
+- **Quality Control**: Inspector roles for quality gates
+- **Production Management**: Supervisor and operator roles
+- **Inventory Operations**: Packer and despatcher roles
+- **System Administration**: Full system management capabilities
 
 ## 🚀 Deployment
 
-### **Production Deployment (Completed)**
+### Production Deployment (Frappe Cloud)
 
-✅ **Deployed to**: `https://sppmaster.frappe.cloud`  
-✅ **Status**: OPERATIONAL  
-✅ **Testing**: All endpoints verified  
-✅ **Security**: RS256 keys generated and secured  
+✅ **Already deployed and tested on:**
+- **URL**: `https://sppmaster.frappe.cloud`
+- **Status**: Production ready
+- **Authentication**: Working with real user credentials
+- **Key Distribution**: JWKS and direct endpoints active
 
-### **Deploy to Your Instance**
+### Custom Deployment
 
-1. **Add to Frappe Cloud:**
-   - Add this GitHub repository to your Frappe Cloud bench
-   - Deploy to your production site
-   - Ensure dependencies are installed
+1. **Deploy to your Frappe Cloud instance:**
+   - Add this repository to your Frappe Cloud bench
+   - Install the app to your site
+   - Configure production URLs
 
 2. **Update Configuration:**
-   - Set your production issuer URL
-   - Configure proper expiry times
-   - Secure RSA key storage
+   ```json
+   {
+     "jwt_issuer": "https://your-site.frappe.cloud",
+     "jwt_audience": "https://your-client-api.com",
+     "jwt_expiry_hours": 24
+   }
+   ```
 
-3. **Test Deployment:**
-   - Verify all endpoints work
-   - Test JWT generation and verification
-   - Confirm role mappings
+## 📊 Client Requirements Compliance
 
-## 📞 **Client Handoff Information**
+### ✅ All Client Requirements Met
 
-### **Ready for Client Integration**
+| **Requirement** | **Implementation** | **Status** |
+|----------------|-------------------|------------|
+| RS256 Algorithm | ✅ RSA with SHA-256 | COMPLETE |
+| Pure JWT Response | ✅ Stateless tokens | COMPLETE |
+| Client Payload Format | ✅ Exact specification | COMPLETE |
+| Public Key Distribution | ✅ JWKS + Direct endpoints | COMPLETE |
+| Manufacturing Roles | ✅ All ERPNext roles included | COMPLETE |
+| Production Ready | ✅ Deployed and tested | COMPLETE |
 
-**Share with your client:**
+### 📝 JWT Payload Compliance
 
-1. **GitHub Repository**: https://github.com/iyyanarr/frappe-jwt-auth
-2. **Production Login**: `https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.login`
-3. **JWKS Endpoint**: `https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.jwks`
-4. **Public Key**: `https://sppmaster.frappe.cloud/api/method/jwt_auth.api.auth.public_key`
-
-**What Your Client Gets:**
-- ✅ Pure JWT Authentication (exactly as requested)
-- ✅ RS256 Encryption (industry standard)
-- ✅ All Manufacturing Roles (complete ERPNext integration)
-- ✅ 24-hour Token Validity (configurable)
-- ✅ Production-Ready Endpoints (scalable and secure)
-- ✅ Standard Key Distribution (JWKS compliance)
+Client's exact specification implemented:
+```json
+{
+  "iss": "https://sppmaster.frappe.cloud",     ✅ Issuer
+  "sub": "username",                           ✅ Subject  
+  "aud": "https://alphaworkz.api.com",        ✅ Audience
+  "exp": 1752231128,                          ✅ Expiration
+  "nbf": 1752144728,                          ✅ Not Before
+  "iat": 1752144728,                          ✅ Issued At
+  "jti": "unique-uuid",                       ✅ JWT ID
+  "userId": "username",                       ✅ User ID
+  "roles": ["manufacturing roles"],          ✅ User Roles
+  "email": "user@example.com",               ✅ Email
+  "name": "User Name"                        ✅ Full Name
+}
+```
 
 ## 📝 License
 
@@ -426,10 +371,11 @@ MIT License - see LICENSE file for details.
 ## 📞 Support
 
 For issues and questions:
-- Create an issue in this repository
-- Contact: iyyanarr@alphaworkz.com
+- **Repository**: Create an issue in this GitHub repository
+- **Email**: iyyanarr@alphaworkz.com
+- **Production Support**: Tested and verified on `https://sppmaster.frappe.cloud`
 
 ---
 
 **Built for Frappe/ERPNext integration with manufacturing workflows** 🏭  
-**Production Status: ✅ DEPLOYED AND OPERATIONAL** 🚀
+**Production Ready | RS256 Encrypted | JWKS Compliant | Manufacturing Integrated** ✅
