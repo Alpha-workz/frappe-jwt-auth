@@ -103,3 +103,44 @@ def verify_token():
             "error": str(e),
             "message": "Token validation failed"
         }
+
+@frappe.whitelist(allow_guest=True)
+def public_key():
+    """
+    Get the public key for JWT verification
+    This is safe to expose publicly
+    """
+    try:
+        from jwt_auth.utils.jwt_utils import get_public_key_content
+        
+        public_key_content = get_public_key_content()
+        
+        return {
+            "public_key": public_key_content,
+            "algorithm": "RS256",
+            "use": "sig",
+            "key_type": "RSA"
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"Public key endpoint error: {str(e)}", "JWT Auth")
+        frappe.throw("Failed to retrieve public key")
+
+@frappe.whitelist(allow_guest=True)
+def jwks():
+    """
+    JSON Web Key Set endpoint for automated key discovery
+    Standard OAuth/JWT practice
+    """
+    try:
+        from jwt_auth.utils.jwt_utils import get_jwks_format
+        
+        jwks_data = get_jwks_format()
+        
+        return {
+            "keys": [jwks_data]
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"JWKS endpoint error: {str(e)}", "JWT Auth")
+        frappe.throw("Failed to retrieve JWKS")

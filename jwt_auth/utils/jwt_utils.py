@@ -210,3 +210,67 @@ def extract_bearer_token(authorization_header):
         return None
         
     return parts[1]
+
+def get_public_key_content():
+    """
+    Get the public key content as string
+    Safe to expose publicly
+    """
+    public_key_path = os.path.join(
+        frappe.get_app_path('jwt_auth'), 
+        'config', 
+        'jwt_public_key.pem'
+    )
+    
+    if not os.path.exists(public_key_path):
+        frappe.throw("Public key file not found")
+    
+    with open(public_key_path, 'r') as f:
+        return f.read()
+
+def get_jwks_format():
+    """
+    Get public key in JWKS (JSON Web Key Set) format
+    Standard format for key distribution
+    """
+    import base64
+    from cryptography.hazmat.primitives import serialization
+    
+    try:
+        # Load the public key
+        public_key_pem = get_public_key_content()
+        
+        # Parse the public key
+        from cryptography.hazmat.primitives.serialization import load_pem_public_key
+        public_key = load_pem_public_key(public_key_pem.encode())
+        
+        # Get the public numbers
+        public_numbers = public_key.public_numbers()
+        
+        # Convert to base64url format (JWKS standard)
+        def int_to_base64url(val):
+            val_bytes = val.to_bytes((val.bit_length() + 7) // 8, 'big')
+            return base64.urlsafe_b64encode(val_bytes).decode('ascii').rstrip('=')
+        
+        return {
+            "kty": "RSA",  # Key type
+            "use": "sig",  # Key use (signature)
+            "alg": "RS256",  # Algorithm
+            "kid": "jwt-auth-key-1",  # Key ID
+            "n": int_to_base64url(public_numbers.n),  # Modulus
+            "e": int_to_base64url(public_numbers.e),  # Exponent
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"JWKS format error: {str(e)}", "JWT Auth")
+        frappe.throw("Failed to generate JWKS format")
+
+def get_key_fingerprint():
+    """
+    Get a fingerprint of the public key for verification
+    """
+    import hashlib
+    
+    public_key_content = get_public_key_content()
+    fingerprint = hashlib.sha256(public_key_content.encode()).hexdigest()[:16]
+    return fingerprint
