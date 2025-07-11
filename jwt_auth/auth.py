@@ -13,11 +13,11 @@ def validate_jwt_auth():
     
     # If no Authorization header, let Frappe handle normal authentication
     if not auth_header:
-        return None
+        return
     
     # If not Bearer token, let Frappe handle normal authentication
     if not auth_header.startswith('Bearer '):
-        return None
+        return
     
     try:
         # Extract token
@@ -39,24 +39,31 @@ def validate_jwt_auth():
         user_email = payload.get('sub')
         
         if not user_email:
-            raise frappe.AuthenticationError(_("Invalid JWT payload: missing subject"))
+            frappe.throw(_("Invalid JWT payload: missing subject"), frappe.AuthenticationError)
         
         # Verify user exists and is enabled
+        if not frappe.db.exists("User", user_email):
+            frappe.throw(_("User not found"), frappe.AuthenticationError)
+            
         user = frappe.get_doc("User", user_email)
-        if not user or user.enabled != 1:
-            raise frappe.AuthenticationError(_("User not found or disabled"))
+        if user.enabled != 1:
+            frappe.throw(_("User is disabled"), frappe.AuthenticationError)
         
         # Set user in frappe context
         frappe.set_user(user_email)
         frappe.local.jwt_user = user_email
         frappe.local.jwt_payload = payload
         
-        return user_email
+        # Mark as authenticated
+        frappe.local.login_manager = None
         
     except jwt.ExpiredSignatureError:
         frappe.throw(_("JWT token has expired"), frappe.AuthenticationError)
     except jwt.InvalidTokenError:
         frappe.throw(_("Invalid JWT token"), frappe.AuthenticationError)
+    except frappe.AuthenticationError:
+        # Re-raise authentication errors
+        raise
     except Exception as e:
         frappe.log_error(f"JWT Auth Error: {str(e)}")
         frappe.throw(_("JWT authentication failed"), frappe.AuthenticationError)

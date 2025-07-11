@@ -151,3 +151,22 @@ def get_jwks():
     except Exception as e:
         frappe.log_error(f"JWKS generation error: {str(e)}")
         frappe.throw(f"Failed to generate JWKS: {str(e)}")
+
+
+def validate_user_credentials(email, password):
+    """Validate user credentials against Frappe user database"""
+    import frappe
+    from frappe.auth import check_password
+    
+    try:
+        # Check if user exists and is enabled
+        user = frappe.get_doc("User", email)
+        if not user.enabled:
+            frappe.throw("User is disabled")
+        
+        # Validate password
+        check_password(email, password)
+        
+        return user  # Return user document instead of True
+    except Exception as e:
+        frappe.throw(f"Authentication failed: {str(e)}")
