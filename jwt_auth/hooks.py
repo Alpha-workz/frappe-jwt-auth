@@ -8,6 +8,16 @@ app_license = "mit"
 # Apps
 # ------------------
 
+# Custom authentication method for JWT
+auth_hooks = [
+    "jwt_auth.auth.validate_jwt_auth"
+]
+
+# Custom validation method  
+on_session_creation = [
+    "jwt_auth.auth.on_session_creation"
+]
+
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page
