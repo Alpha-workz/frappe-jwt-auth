@@ -3,6 +3,7 @@ from frappe import _
 import jwt
 from datetime import datetime
 import os
+import json
 
 
 def validate_jwt_token(token):
